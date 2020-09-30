@@ -85,6 +85,14 @@ private:
 
 	wasm::FunctionDefinition translateFunction(yul::FunctionDefinition const& _funDef);
 
+	/// Imports an external function into the current module.
+	/// This external function is accessible within the current module via `_builtin->name` where
+	/// `_module` and `_name` is used to define what external function will be called.
+	/// @param _builtin the builtin that will be imported into the current module.
+	/// @param _module the module name under which the external function can be found.
+	/// @param _name the function name within the module _module under which the external function can be found.
+	void importBuiltinFunction(BuiltinFunction const* _builtin, std::string const& _module, std::string const& _name);
+
 	std::string newLabel();
 	/// Selects a subset of global variables matching specified sequence of variable types.
 	/// Defines more global variables of a given type if there's not enough.

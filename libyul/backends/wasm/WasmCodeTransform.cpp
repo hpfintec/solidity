@@ -118,28 +118,34 @@ wasm::Expression WasmCodeTransform::operator()(yul::ExpressionStatement const& _
 	return visitReturnByValue(_statement.expression);
 }
 
+void WasmCodeTransform::importBuiltinFunction(BuiltinFunction const* _builtin, std::string const& _module, std::string const& _name)
+{
+	yulAssert(_builtin, "");
+	yulAssert(_builtin->returns.size() <= 1, "");
+	// Imported function, use regular call, but mark for import.
+	if (!m_functionsToImport.count(_builtin->name))
+	{
+		wasm::FunctionImport imp{
+			_module,
+			_name,
+			_builtin->name.str(),
+			{},
+			_builtin->returns.empty() ? nullopt : make_optional<wasm::Type>(translatedType(_builtin->returns.front()))
+		};
+		for (auto const& param: _builtin->parameters)
+			imp.paramTypes.emplace_back(translatedType(param));
+		m_functionsToImport[_builtin->name] = move(imp);
+	}
+}
+
 wasm::Expression WasmCodeTransform::operator()(yul::FunctionCall const& _call)
 {
 	if (BuiltinFunction const* builtin = m_dialect.builtin(_call.functionName.name))
 	{
-		if (_call.functionName.name.str().substr(0, 4) == "eth.")
-		{
-			yulAssert(builtin->returns.size() <= 1, "");
-			// Imported function, use regular call, but mark for import.
-			if (!m_functionsToImport.count(builtin->name))
-			{
-				wasm::FunctionImport imp{
-					"ethereum",
-					builtin->name.str().substr(4),
-					builtin->name.str(),
-					{},
-					builtin->returns.empty() ? nullopt : make_optional<wasm::Type>(translatedType(builtin->returns.front()))
-				};
-				for (auto const& param: builtin->parameters)
-					imp.paramTypes.emplace_back(translatedType(param));
-				m_functionsToImport[builtin->name] = std::move(imp);
-			}
-		}
+		if (_call.functionName.name.str().substr(0, 6) == "debug.")
+			importBuiltinFunction(builtin, "debug", builtin->name.str().substr(6));
+		else if (_call.functionName.name.str().substr(0, 4) == "eth.")
+			importBuiltinFunction(builtin, "ethereum", builtin->name.str().substr(4));
 		else
 		{
 			vector<wasm::Expression> arguments;
