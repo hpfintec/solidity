@@ -253,14 +253,15 @@ void WasmDialect::addEthereumExternals()
 
 void WasmDialect::addDebugExternals()
 {
-	static vector<External> debugExternals({
-		{"print32", {c_i32}, {}},
-		{"print64", {c_i64}, {}},
-		{"printMem", {c_i32, c_i32}, {}},
-		{"printMemHex", {c_i32, c_i32}, {}},
-		{"printStorage", {c_i32}, {}},
-		{"printStorageHex", {c_i32}, {}},
-	});
+	static vector<External> debugExternals;
+//	{
+//		{"print32", {c_i32}, {}},
+//		{"print64", {c_i64}, {}},
+//		{"printMem", {c_i32, c_i32}, {}},
+//		{"printMemHex", {c_i32, c_i32}, {}},
+//		{"printStorage", {c_i32}, {}},
+//		{"printStorageHex", {c_i32}, {}},
+//	});
 	for (External const& ext: debugExternals)
 	{
 		BuiltinFunction& f = addBuiltinFunction("debug.", ext.name, ext.parameters, ext.returns, ext.controlFlowSideEffects);
