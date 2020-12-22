@@ -195,53 +195,54 @@ WasmDialect const& WasmDialect::instance()
 
 void WasmDialect::addEthereumExternals()
 {
-	static vector<External> externals({
-		{"getAddress", {c_i32ptr}, {}},
-		{"getExternalBalance", {c_i32ptr, c_i32ptr}, {}},
-		{"getBlockHash", {c_i64, c_i32ptr}, {c_i32}},
-		{"call", {c_i64, c_i32ptr, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
-		{"callDataCopy", {c_i32ptr, c_i32, c_i32}, {}},
-		{"getCallDataSize", {}, {c_i32}},
-		{"callCode", {c_i64, c_i32ptr, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
-		{"callDelegate", {c_i64, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
-		{"callStatic", {c_i64, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
-		{"storageStore", {c_i32ptr, c_i32ptr}, {}},
-		{"storageLoad", {c_i32ptr, c_i32ptr}, {}},
-		{"getCaller", {c_i32ptr}, {}},
-		{"getCallValue", {c_i32ptr}, {}},
-		{"codeCopy", {c_i32ptr, c_i32, c_i32}, {}},
-		{"getCodeSize", {}, {c_i32}},
-		{"getBlockCoinbase", {c_i32ptr}, {}},
-		{"create", {c_i32ptr, c_i32ptr, c_i32, c_i32ptr}, {c_i32}},
-		{"getBlockDifficulty", {c_i32ptr}, {}},
-		{"externalCodeCopy", {c_i32ptr, c_i32ptr, c_i32, c_i32}, {}},
-		{"getExternalCodeSize", {c_i32ptr}, {c_i32}},
-		{"getGasLeft", {}, {c_i64}},
-		{"getBlockGasLimit", {}, {c_i64}},
-		{"getTxGasPrice", {c_i32ptr}, {}},
-		{"log", {c_i32ptr, c_i32, c_i32, c_i32ptr, c_i32ptr, c_i32ptr, c_i32ptr}, {}},
-		{"getBlockNumber", {}, {c_i64}},
-		{"getTxOrigin", {c_i32ptr}, {}},
-		{"finish", {c_i32ptr, c_i32}, {}, ControlFlowSideEffects{true, false}},
-		{"revert", {c_i32ptr, c_i32}, {}, ControlFlowSideEffects{true, true}},
-		{"getReturnDataSize", {}, {c_i32}},
-		{"returnDataCopy", {c_i32ptr, c_i32, c_i32}, {}},
-		{"selfDestruct", {c_i32ptr}, {}, ControlFlowSideEffects{true, false}},
-		{"getBlockTimestamp", {}, {c_i64}}
-	});
-
+	static vector<External> externals;
+//	{
+//		{"getAddress", {c_i32ptr}, {}},
+//		{"getExternalBalance", {c_i32ptr, c_i32ptr}, {}},
+//		{"getBlockHash", {c_i64, c_i32ptr}, {c_i32}},
+//		{"call", {c_i64, c_i32ptr, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
+//		{"callDataCopy", {c_i32ptr, c_i32, c_i32}, {}},
+//		{"getCallDataSize", {}, {c_i32}},
+//		{"callCode", {c_i64, c_i32ptr, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
+//		{"callDelegate", {c_i64, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
+//		{"callStatic", {c_i64, c_i32ptr, c_i32ptr, c_i32}, {c_i32}},
+//		{"storageStore", {c_i32ptr, c_i32ptr}, {}},
+//		{"storageLoad", {c_i32ptr, c_i32ptr}, {}},
+//		{"getCaller", {c_i32ptr}, {}},
+//		{"getCallValue", {c_i32ptr}, {}},
+//		{"codeCopy", {c_i32ptr, c_i32, c_i32}, {}},
+//		{"getCodeSize", {}, {c_i32}},
+//		{"getBlockCoinbase", {c_i32ptr}, {}},
+//		{"create", {c_i32ptr, c_i32ptr, c_i32, c_i32ptr}, {c_i32}},
+//		{"getBlockDifficulty", {c_i32ptr}, {}},
+//		{"externalCodeCopy", {c_i32ptr, c_i32ptr, c_i32, c_i32}, {}},
+//		{"getExternalCodeSize", {c_i32ptr}, {c_i32}},
+//		{"getGasLeft", {}, {c_i64}},
+//		{"getBlockGasLimit", {}, {c_i64}},
+//		{"getTxGasPrice", {c_i32ptr}, {}},
+//		{"log", {c_i32ptr, c_i32, c_i32, c_i32ptr, c_i32ptr, c_i32ptr, c_i32ptr}, {}},
+//		{"getBlockNumber", {}, {c_i64}},
+//		{"getTxOrigin", {c_i32ptr}, {}},
+//		{"finish", {c_i32ptr, c_i32}, {}, ControlFlowSideEffects{true, false}},
+//		{"revert", {c_i32ptr, c_i32}, {}, ControlFlowSideEffects{true, true}},
+//		{"getReturnDataSize", {}, {c_i32}},
+//		{"returnDataCopy", {c_i32ptr, c_i32, c_i32}, {}},
+//		{"selfDestruct", {c_i32ptr}, {}, ControlFlowSideEffects{true, false}},
+//		{"getBlockTimestamp", {}, {c_i64}}
+//	};
 	for (External const& ext: externals)
 	{
 		BuiltinFunction& f = addBuiltinFunction("eth.", ext.name, ext.parameters, ext.returns, ext.controlFlowSideEffects);
 		f.sideEffects.cannotLoop = true;
 		f.sideEffects.movableApartFromEffects = !ext.controlFlowSideEffects.terminates;
-		static set<string> const writesToStorage{
-			"storageStore",
-			"call",
-			"callcode",
-			"callDelegate",
-			"create"
-		};
+		static set<string> const writesToStorage;
+//		{
+//			"storageStore",
+//			"call",
+//			"callcode",
+//			"callDelegate",
+//			"create"
+//		};
 		static set<string> const readsStorage{"storageLoad", "callStatic"};
 		if (readsStorage.count(ext.name))
 			f.sideEffects.storage = SideEffects::Read;
@@ -260,11 +261,9 @@ void WasmDialect::addDebugExternals()
 		{"printStorage", {c_i32}, {}},
 		{"printStorageHex", {c_i32}, {}},
 	});
-
 	for (External const& ext: debugExternals)
 	{
-		BuiltinFunction& f
-			= addBuiltinFunction("debug.", ext.name, ext.parameters, ext.returns, ext.controlFlowSideEffects);
+		BuiltinFunction& f = addBuiltinFunction("debug.", ext.name, ext.parameters, ext.returns, ext.controlFlowSideEffects);
 		f.sideEffects.cannotLoop = true;
 		f.sideEffects.movableApartFromEffects = !ext.controlFlowSideEffects.terminates;
 	}
