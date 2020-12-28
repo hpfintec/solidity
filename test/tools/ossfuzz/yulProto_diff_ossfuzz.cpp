@@ -21,6 +21,9 @@
 #include <test/tools/ossfuzz/yulProto.pb.h>
 #include <test/tools/fuzzer_common.h>
 #include <test/tools/ossfuzz/protoToYul.h>
+
+#include <test/libyul/YulOptimizerTestCommon.h>
+
 #include <src/libfuzzer/libfuzzer_macro.h>
 
 #include <libyul/AssemblyStack.h>
@@ -104,11 +107,17 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 	)
 		return;
 
-	stack.optimize();
+	YulOptimizerTester optimizerTest(
+		stack.parserResult(),
+		evmDialect,
+		optStep,
+		true
+	);
+	shared_ptr<solidity::yul::Block> astBlock = optimizerTest.run();
 	termReason = yulFuzzerUtil::interpret(
 		os2,
-		stack.parserResult()->code,
-		EVMDialect::strictAssemblyForEVMObjects(version)
+		astBlock,
+		evmDialect
 	);
 	if (
 		termReason == yulFuzzerUtil::TerminationReason::StepLimitReached ||
