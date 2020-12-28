@@ -91,7 +91,7 @@ private:
 	/// @param _builtin the builtin that will be imported into the current module.
 	/// @param _module the module name under which the external function can be found.
 	/// @param _name the function name within the module _module under which the external function can be found.
-	void importBuiltinFunction(BuiltinFunction const* _builtin, std::string const& _module, std::string const& _name);
+	void importBuiltIn(BuiltinFunction const* _builtin, std::string const& _module, std::string const& _name);
 
 	std::string newLabel();
 	/// Selects a subset of global variables matching specified sequence of variable types.

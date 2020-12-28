@@ -118,7 +118,7 @@ wasm::Expression WasmCodeTransform::operator()(yul::ExpressionStatement const& _
 	return visitReturnByValue(_statement.expression);
 }
 
-void WasmCodeTransform::importBuiltinFunction(BuiltinFunction const* _builtin, std::string const& _module, std::string const& _name)
+void WasmCodeTransform::importBuiltIn(BuiltinFunction const* _builtin, std::string const& _module, std::string const& _name)
 {
 	yulAssert(_builtin, "");
 	yulAssert(_builtin->returns.size() <= 1, "");
@@ -143,9 +143,9 @@ wasm::Expression WasmCodeTransform::operator()(yul::FunctionCall const& _call)
 	if (BuiltinFunction const* builtin = m_dialect.builtin(_call.functionName.name))
 	{
 		if (_call.functionName.name.str().substr(0, 6) == "debug.")
-			importBuiltinFunction(builtin, "debug", builtin->name.str().substr(6));
+			importBuiltIn(builtin, "debug", builtin->name.str().substr(6));
 		else if (_call.functionName.name.str().substr(0, 4) == "eth.")
-			importBuiltinFunction(builtin, "ethereum", builtin->name.str().substr(4));
+			importBuiltIn(builtin, "ethereum", builtin->name.str().substr(4));
 		else
 		{
 			vector<wasm::Expression> arguments;
